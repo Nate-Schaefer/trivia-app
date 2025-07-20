@@ -6,9 +6,28 @@ export default function Login() {
 
   function handleLogin(e) {
     e.preventDefault();
-    // TODO: Add login logic
-    console.log('Logging in:', { email, password });
+  
+    fetch('https://2hsapec1j5.execute-api.us-east-2.amazonaws.com/dev/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email, password }),
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.message === 'Login successful') {
+          console.log('User logged in:', data.user);
+          // TODO: Save user in state/context and redirect to game
+        } else {
+          alert(data.message || 'Login failed');
+        }
+      })
+      .catch(err => {
+        console.error('Login error:', err);
+      });
   }
+  
 
   return (
     <div style={{ textAlign: 'center', padding: '2rem' }}>
