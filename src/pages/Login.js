@@ -8,7 +8,7 @@ export default function Login() {
     e.preventDefault();
     console.log(email, password);
   
-    fetch('https://2hsapec1j5.execute-api.us-east-2.amazonaws.com/dev/login', {
+    fetch('https://rixj0x2fgk.execute-api.us-east-2.amazonaws.com/devl', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
