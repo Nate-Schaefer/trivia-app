@@ -6,6 +6,7 @@ export default function Login() {
 
   function handleLogin(e) {
     e.preventDefault();
+    console.log(email, password);
   
     fetch('https://2hsapec1j5.execute-api.us-east-2.amazonaws.com/dev/login', {
       method: 'POST',
