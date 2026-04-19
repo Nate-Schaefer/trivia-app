@@ -5,7 +5,7 @@ on:
       - main
 
 jobs:
-  verify:
+  verify-frontend:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -16,5 +16,23 @@ jobs:
         with:
           node-version: 24
           cache: 'pnpm'
+          cache-dependency-path: frontend/pnpm-lock.yaml
       - run: pnpm install
+        working-directory: frontend
       - run: pnpm lint
+        working-directory: frontend
+  verify-backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - actions/setup-go@v5
+        with:
+          go-version: backend/go.mod
+      - name: Check formatting
+        run: |
+          unformatted=$(gofmt -l .)
+          if [ -n "$unformatted" ]; then
+            echo "Unformatted files:" && echo "$unformatted" && exit 1
+          fi
+        working-directory: backend
+        
