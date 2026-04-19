@@ -1,35 +1,23 @@
-import js from '@eslint/js'                                                                                                                                                                                        
-import react from 'eslint-plugin-react'                                                                                                                                                                            
-import reactHooks from 'eslint-plugin-react-hooks'    
-import globals from 'globals'                                                                                                                                                             
-                                                                                                                                                                                                                    
-export default [                                                                                                                                                                                                   
-    js.configs.recommended,
-    react.configs.flat.recommended,                                                                                                                                                                                  
-    react.configs.flat['jsx-runtime'],
-    {                                                                                                                                                                                                                
-        files: ['src/**/*.{js,jsx}'],
-        plugins: {
-        'react-hooks': reactHooks,
-        },
-        languageOptions: {
-            globals: {
-                ...globals.browser,
-                ...globals.jest,
-            },
-            parserOptions: {                                                                                                                                                                                             
-                ecmaFeatures: {
-                   jsx: true,                                                                                                                                                                                               
-                },      
-            },
-        },
-        settings: {                                                                                                                                                                                                        
-            react: {                                                                                                                                                                                                         
-              version: '19',                                                                                                                                                                                             
-            },                                                                                                                                                                                                               
-        },
-        rules: {
-            ...reactHooks.configs.recommended.rules,
-        },
+import js from '@eslint/js'
+import globals from 'globals'
+import reactHooks from 'eslint-plugin-react-hooks'
+import reactRefresh from 'eslint-plugin-react-refresh'
+import tseslint from 'typescript-eslint'
+import { defineConfig, globalIgnores } from 'eslint/config'
+
+export default defineConfig([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{ts,tsx}'],
+    extends: [
+      js.configs.recommended,
+      tseslint.configs.recommended,
+      reactHooks.configs.flat.recommended,
+      reactRefresh.configs.vite,
+    ],
+    languageOptions: {
+      ecmaVersion: 2020,
+      globals: globals.browser,
     },
-]
+  },
+])
