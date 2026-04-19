@@ -15,8 +15,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-          cache: 'pnpm'
-          cache-dependency-path: frontend/pnpm-lock.yaml
       - run: pnpm install
         working-directory: frontend
       - run: pnpm lint
@@ -27,7 +25,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
-          go-version: backend/go.mod
+          go-version-file: backend/go.mod
       - name: Check formatting
         run: |
           unformatted=$(gofmt -l .)
