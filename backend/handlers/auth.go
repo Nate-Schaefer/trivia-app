@@ -39,9 +39,16 @@ func Register(db *pgxpool.Pool) http.HandlerFunc {
 			return
 		}
 
+		token, err := utils.GenerateJWT(player.ID, player.Username)
+		if err != nil {
+			fmt.Println("Failed to generate JWT: %v", err)
+			http.Error(w, "Internal server error", http.StatusInternalServerError)
+			return
+		}
+
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusCreated)
-		json.NewEncoder(w).Encode(player)
+		json.NewEncoder(w).Encode(map[string]string{"token": token})
 	}
 }
 

@@ -8,20 +8,23 @@ export default function Login() {
     e.preventDefault();
     console.log(email, password);
 
-    fetch('https://rixj0x2fgk.execute-api.us-east-2.amazonaws.com/devl', {
+    fetch('http://localhost:8080/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
     })
-      .then(res => res.json())
-      .then(data => {
-        if (data.message === 'Login successful') {
-          console.log('User logged in:', data.user);
-        } else {
-          alert(data.message || 'Login failed');
+      .then(res => {
+        if (!res.ok) {
+          throw new Error('Login failed');
         }
+        return res.json();
       })
-      .catch(err => console.error('Login error:', err));
+      .then(data => {
+        localStorage.setItem('token', data.token)
+        window.location.href = '/dashboard';
+      }).catch(err => {
+        alert(err.message);
+      });
   }
 
   return (
