@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
-	"fmt"
+	"strings"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"golang.org/x/crypto/bcrypt"
@@ -35,13 +35,20 @@ func Register(db *pgxpool.Pool) http.HandlerFunc {
 		player, err := models.CreatePlayer(db, creds.Email, creds.Username, string(hash))
 		if err != nil {
 			log.Printf("Failed to create player: %v", err)
-			http.Error(w, "Failed to create player", http.StatusInternalServerError)
+			errMsg := err.Error()
+			if strings.Contains(errMsg, "players_email_key") {
+				http.Error(w, "Email is already registered", http.StatusConflict)
+			} else if strings.Contains(errMsg, "players_username_key") {
+				http.Error(w, "Username is already taken", http.StatusConflict)
+			} else {
+				http.Error(w, "Failed to create player", http.StatusInternalServerError)
+			}
 			return
 		}
 
 		token, err := utils.GenerateJWT(player.ID, player.Username)
 		if err != nil {
-			fmt.Println("Failed to generate JWT: %v", err)
+			log.Printf("Failed to generate JWT: %v", err)
 			http.Error(w, "Internal server error", http.StatusInternalServerError)
 			return
 		}
@@ -67,18 +74,18 @@ func Login(db *pgxpool.Pool) http.HandlerFunc {
 
 		player, hash, err := models.GetPlayerByEmail(db, creds.Email)
 		if err != nil {
-			http.Error(w, "Invalid email or password", http.StatusUnauthorized)
+			http.Error(w, "No account found with that email", http.StatusUnauthorized)
 			return
 		}
 
 		if err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(creds.Password)); err != nil {
-			http.Error(w, "Invalid email or password", http.StatusUnauthorized)
+			http.Error(w, "Incorrect password", http.StatusUnauthorized)
 			return
 		}
 
 		token, err := utils.GenerateJWT(player.ID, player.Username)
 		if err != nil {
-			fmt.Println("Failed to generate JWT: %v", err)
+			log.Printf("Failed to generate JWT: %v", err)
 			http.Error(w, "Internal server error", http.StatusInternalServerError)
 			return
 		}
