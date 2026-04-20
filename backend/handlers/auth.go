@@ -2,13 +2,15 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
+	"log"
 	"net/http"
+	"fmt"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/nathanschaefer/trivia-app/backend/models"
+	"github.com/nathanschaefer/trivia-app/backend/utils"
 )
 
 func Register(db *pgxpool.Pool) http.HandlerFunc {
@@ -32,13 +34,49 @@ func Register(db *pgxpool.Pool) http.HandlerFunc {
 
 		player, err := models.CreatePlayer(db, creds.Email, creds.Username, string(hash))
 		if err != nil {
+			log.Printf("Failed to create player: %v", err)
 			http.Error(w, "Failed to create player", http.StatusInternalServerError)
-			fmt.Println("Failed to create player: %v", err)
 			return
 		}
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusCreated)
 		json.NewEncoder(w).Encode(player)
+	}
+}
+
+func Login(db *pgxpool.Pool) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var creds models.PlayerCredentials
+		if err := json.NewDecoder(r.Body).Decode(&creds); err != nil {
+			http.Error(w, "Invalid request body", http.StatusBadRequest)
+			return
+		}
+
+		if creds.Email == "" || creds.Password == "" {
+			http.Error(w, "Email and password are required", http.StatusBadRequest)
+			return
+		}
+
+		player, hash, err := models.GetPlayerByEmail(db, creds.Email)
+		if err != nil {
+			http.Error(w, "Invalid email or password", http.StatusUnauthorized)
+			return
+		}
+
+		if err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(creds.Password)); err != nil {
+			http.Error(w, "Invalid email or password", http.StatusUnauthorized)
+			return
+		}
+
+		token, err := utils.GenerateJWT(player.ID, player.Username)
+		if err != nil {
+			fmt.Println("Failed to generate JWT: %v", err)
+			http.Error(w, "Internal server error", http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]string{"token": token})
 	}
 }

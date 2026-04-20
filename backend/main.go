@@ -37,6 +37,7 @@ func main() {
 
 	http.HandleFunc("/health", app.healthHandler)
 	http.HandleFunc("/register", handlers.Register(app.db))
+	http.HandleFunc("/login", handlers.Login(app.db))
 
 	fmt.Println("Server running on :8080")
 	http.ListenAndServe(":8080", nil)

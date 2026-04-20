@@ -27,3 +27,14 @@ func CreatePlayer(db *pgxpool.Pool, email, username, passwordHash string) (Playe
 	).Scan(&p.ID, &p.Email, &p.Username)
 	return p, err
 }
+
+func GetPlayerByEmail(db *pgxpool.Pool, email string) (Player, string, error) {
+	var p Player
+	var passwordHash string
+	err := db.QueryRow(
+		context.Background(),
+		"SELECT id, email, username, password_hash FROM players WHERE email = $1",
+		email,
+	).Scan(&p.ID, &p.Email, &p.Username, &passwordHash)
+	return p, passwordHash, err
+}
