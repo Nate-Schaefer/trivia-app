@@ -1,18 +1,13 @@
-import { useEffect, useState } from 'react';
-
 export default function Dashboard() {
-  const [username, setUsername] = useState<string>('');
+  const token = localStorage.getItem('token');
 
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      window.location.href = '/login';
-      return;
-    }
+  if (!token) {
+    window.location.href = '/login';
+    return null;
+  }
 
-    const payload = JSON.parse(atob(token.split('.')[1]));
-    setUsername(payload.username);
-  }, []);
+  const payload = JSON.parse(atob(token.split('.')[1]));
+  const username: string = payload.username;
 
   return (
     <div style={{ textAlign: 'center', padding: '2rem' }}>
