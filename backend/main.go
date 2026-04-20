@@ -9,6 +9,7 @@ import (
 	"os"
 
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/nathanschaefer/trivia-app/backend/handlers"
 )
 
 type App struct {
@@ -35,6 +36,8 @@ func main() {
 	app := &App{db: db}
 
 	http.HandleFunc("/health", app.healthHandler)
+	http.HandleFunc("/register", handlers.Register(app.db))
+
 	fmt.Println("Server running on :8080")
 	http.ListenAndServe(":8080", nil)
 }
