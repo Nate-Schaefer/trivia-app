@@ -1,7 +1,9 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+
 
 export default function Login() {
+  const navigate = useNavigate();
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [error, setError] = useState<string>('');
@@ -24,7 +26,7 @@ export default function Login() {
       })
       .then(data => {
         localStorage.setItem('token', data.token);
-        window.location.href = '/dashboard';
+        navigate('/dashboard');
       })
       .catch(err => setError(err.message));
   }

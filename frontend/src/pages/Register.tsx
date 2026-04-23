@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 export default function Register() {
+  const navigate = useNavigate();
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [username, setUsername] = useState<string>('');
@@ -25,7 +26,7 @@ export default function Register() {
       })
       .then(data => {
         localStorage.setItem('token', data.token);
-        window.location.href = '/dashboard';
+        navigate('/dashboard');
       })
       .catch(err => setError(err.message));
   }
