@@ -39,11 +39,11 @@ func main() {
 	godotenv.Load()
 	dbURL := os.Getenv("DATABASE_URL")
 	if dbURL == "" {
-		log.Fatal("DATABASE_URL environment variable is not set")
+		log.Fatalf("DATABASE_URL environment variable is not set")
 	}
 	db, err := pgxpool.New(context.Background(), dbURL)
 	if err != nil {
-		log.Fatal("Unable to connect to database: %v", err)
+		log.Fatalf("Unable to connect to database: %v", err)
 	}
 
 	defer db.Close()
@@ -53,6 +53,7 @@ func main() {
 	http.HandleFunc("/health", app.healthHandler)
 	http.HandleFunc("/register", handlers.Register(app.db))
 	http.HandleFunc("/login", handlers.Login(app.db))
+	http.HandleFunc("/games", handlers.CreateGame(app.db))
 
 	fmt.Println("Server running on :8080")
 	http.ListenAndServe(":8080", corsMiddleware(http.DefaultServeMux))
