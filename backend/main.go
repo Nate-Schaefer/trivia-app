@@ -54,6 +54,8 @@ func main() {
 	http.HandleFunc("/register", handlers.Register(app.db))
 	http.HandleFunc("/login", handlers.Login(app.db))
 	http.HandleFunc("/games", handlers.CreateGame(app.db))
+	http.HandleFunc("/games/join", handlers.JoinGame(app.db))
+	http.HandleFunc("/games/team", handlers.SelectTeam(app.db))
 
 	fmt.Println("Server running on :8080")
 	http.ListenAndServe(":8080", corsMiddleware(http.DefaultServeMux))

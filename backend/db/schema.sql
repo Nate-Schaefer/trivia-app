@@ -31,7 +31,7 @@ CREATE TABLE games (
 CREATE TABLE game_players (
     game_id INTEGER NOT NULL REFERENCES games(id),
     player_id INTEGER NOT NULL REFERENCES players(id),
-    team TEXT NOT NULL CHECK (team IN ('red', 'blue')),
+    team TEXT CHECK (team IN ('red', 'blue')),
     PRIMARY KEY (game_id, player_id)
 );
 

@@ -35,3 +35,41 @@ func CreateGame(db *pgxpool.Pool, hostID int) (Game, error) {
 	).Scan(&g.ID, &g.Code, &g.Status, &g.HostID, &g.RedScore, &g.BlueScore)
 	return g, err
 }
+
+func GetGameByCode(db *pgxpool.Pool, code string) (Game, error) {
+	var g Game
+	err := db.QueryRow(
+		context.Background(),
+		"SELECT id, code, status, host_id, red_score, blue_score FROM games WHERE code = $1",
+		code,
+	).Scan(&g.ID, &g.Code, &g.Status, &g.HostID, &g.RedScore, &g.BlueScore)
+	return g, err
+}
+
+func JoinGame(db *pgxpool.Pool, gameID, playerID int) error {
+	_, err := db.Exec(
+		context.Background(),
+		"INSERT INTO game_players (game_id, player_id) VALUES ($1, $2)",
+		gameID, playerID,
+	)
+	return err
+}
+
+func IsPlayerInGame(db *pgxpool.Pool, gameID, playerID int) (bool, error) {
+	var count int
+	err := db.QueryRow(
+		context.Background(),
+		"SELECT COUNT(*) FROM game_players WHERE game_id = $1 AND player_id = $2",
+		gameID, playerID,
+	).Scan(&count)
+	return count > 0, err
+}
+
+func SelectTeam(db *pgxpool.Pool, gameID, playerID int, team string) error {
+	_, err := db.Exec(
+		context.Background(),
+		"UPDATE game_players SET team = $1 WHERE game_id = $2 AND player_id = $3",
+		team, gameID, playerID,
+	)
+	return err
+}
