@@ -16,6 +16,18 @@ type Game struct {
 	BlueScore int    `json:"blue_score"`
 }
 
+type GamePlayer struct {
+	Username string `json:"username"`
+	Team     string `json:"team"`
+}
+
+type GameState struct {
+	ID        int    `json:"id"`
+	Code      string `json:"code"`
+	Status    string `json:"status"`
+	Players   []GamePlayer `json:"players"`
+}
+
 func generateCode() string {
 	chars := "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 	code := make([]byte, 6)
@@ -44,6 +56,39 @@ func GetGameByCode(db *pgxpool.Pool, code string) (Game, error) {
 		code,
 	).Scan(&g.ID, &g.Code, &g.Status, &g.HostID, &g.RedScore, &g.BlueScore)
 	return g, err
+}
+
+func GetGameState(db *pgxpool.Pool, gameID int) (GameState, error) {
+	rows, err := db.Query(
+		context.Background(),
+		`SELECT g.id, g.code, g.status, p.username, gp.team FROM games g
+			LEFT JOIN game_players gp ON gp.game_id = g.id
+			LEFT JOIN players p ON p.id = gp.player_id WHERE g.id = $1`,
+		gameID,
+	)
+	if err != nil {
+		return GameState{}, err
+	}
+	defer rows.Close()
+
+	var state GameState
+	first := true
+
+	for rows.Next() {
+		var username, team *string
+		err := rows.Scan(&state.ID, &state.Code, &state.Status, &username, &team)
+		if err != nil {
+			return GameState{}, err
+		}
+		if first {
+			first = false
+		}
+		if username != nil {
+			state.Players = append(state.Players, GamePlayer{Username: *username, Team: *team})
+		}
+	}
+
+	return state, nil
 }
 
 func JoinGame(db *pgxpool.Pool, gameID, playerID int) error {
