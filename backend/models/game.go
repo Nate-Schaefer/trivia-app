@@ -22,10 +22,10 @@ type GamePlayer struct {
 }
 
 type GameState struct {
-	ID        int    `json:"id"`
-	Code      string `json:"code"`
-	Status    string `json:"status"`
-	Players   []GamePlayer `json:"players"`
+	ID      int          `json:"id"`
+	Code    string       `json:"code"`
+	Status  string       `json:"status"`
+	Players []GamePlayer `json:"players"`
 }
 
 func generateCode() string {
